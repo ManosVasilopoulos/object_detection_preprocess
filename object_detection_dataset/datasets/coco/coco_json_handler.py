@@ -7,6 +7,7 @@ from pycocotools.mask import toBbox
 from object_detection_dataset.constants._path_creator import ConfigPaths
 import sys
 
+
 class COCO_JSON_Handler(JSON_Handler):
     image_ids: list
     image_names: list
@@ -42,7 +43,8 @@ class COCO_JSON_Handler(JSON_Handler):
                         self.category_ids, self.categories, self.supercategories
                     )
                 ),
-                columns=['image_ids', 'image_names', 'annotation_ids', 'bboxes', 'category_ids', 'categories', 'supercategories']
+                columns=['image_ids', 'image_names', 'annotation_ids', 'bboxes', 'category_ids', 'categories',
+                         'supercategories']
             )
             print('Saving in CSV at: ', csv_path)
             df.to_csv(csv_path)
@@ -80,13 +82,20 @@ class COCO_JSON_Handler(JSON_Handler):
         return self.supercategories
 
     def extract_image_data(self):
-        image_ids = []
-        image_names = []
+        image_ids = []  # list of int
+        image_names = []  # list of str
 
-        annotation_ids = []
-        bboxes = []
+        """ for the lists below, each element corresponds to one image """
 
-        category_ids = []
+        # Each element is a list of annotation-IDs that correspond to one image
+        annotation_ids = []  # list of list of int
+
+        # Each element is a list of BBoxes that correspond to one image
+        bboxes = []  # list of lists of lists of float (list of list of bboxes)
+
+        # Each element is a list of categories that correspond to one image
+        # each category corresponds to one bounding box
+        category_ids = []  # list of lists of int
         categories = []
         supercategories = []
 
@@ -102,42 +111,55 @@ class COCO_JSON_Handler(JSON_Handler):
             category_ids.append(category_id)
 
             print('Searching for category of image_id:"{}" and annotation_id:"{}"'.format(val['id'], annotation_id))
-            category, supercategory = self.__find_category_of_category_id(category_id)
-            categories.append(category)
-            supercategories.append(supercategory)
+            category_s, supercategory_s = self.__find_category_of_category_id(category_id)
+            categories.append(category_s)
+            supercategories.append(supercategory_s)
 
         self.image_ids, self.image_names, \
         self.annotation_ids, self.bboxes, \
-        self.category_ids, self.categories, self.supercategories = image_ids, image_names,\
-                                                                   annotation_ids, bboxes,\
+        self.category_ids, self.categories, self.supercategories = image_ids, image_names, \
+                                                                   annotation_ids, bboxes, \
                                                                    category_ids, categories, supercategories
         return image_ids, image_names, annotation_ids, bboxes, category_ids, categories, supercategories
 
-    def __find_category_of_category_id(self, category_id: int):
-        for val in self.data['categories']:
-            print('Found Category.\n')
-            if val['id'] == category_id:
-                return val['name'], val['supercategory']
-
-        print('Category not found.')
-        return '', ''
+    def __find_category_of_category_id(self, category_ids: list):
+        categories, supercategories = [], []
+        for category_id in category_ids:
+            for val in self.data['categories']:
+                print('Found Category.\n')
+                if val['id'] == category_id:
+                    categories.append(val['name'])
+                    supercategories.append(val['supercategory'])
+        if len(categories) == 0:
+            print('No categories found.')
+        return categories, supercategories
 
     def __find_bbox_of_id(self, image_id: int):
+        total_bboxes = []
+        category_ids = []
+        id_list = []
         for val in self.data['annotations']:
             if val['image_id'] == image_id:
                 print('Found Annotations with annotation_id: "{}".'.format(val['id']))
+
+                """ Legacy code
                 if type(val['bbox'][0]) == int:
                     bboxes = [val['bbox']]
                 else:
                     bboxes = val['bbox']
                 return bboxes, val['category_id'], val['id']
-        print('Annotations not found.')
-        raise Exception("COCO_JSON_HandlerError: No bounding boxes found for image with image_id:'{}'".format(image_id))
+                """
+                total_bboxes.append(val['bbox'])
+                category_ids.append(val['category_id'])
+                id_list.append(val['id'])
+        if len(total_bboxes) == 0:
+            print('No bounding boxes for image with "image_id: {}"'.format(image_id))
+        return total_bboxes, category_ids, id_list
+
 
 if __name__ == '__main__':
-    paths = ConfigPaths("E:\\Data Sets\\Detection\\COCO", False)
-    dataset_dir = 'E:\\Data Sets\\Detection\\COCO'
-    json_path = 'E:\\Data Sets\\Detection\\COCO\\outputs\\original_format\\instances_val2017.json'
+    paths = ConfigPaths("D:\Documents\Computer Vision\Object Detection\Datasets\COCO", False)
+    dataset_dir = 'D:\Documents\Computer Vision\Object Detection\Datasets\COCO'
+    json_path = os_path_join(dataset_dir, 'instances_val2017.json')
 
     handler = COCO_JSON_Handler(dataset_dir, json_path)
-

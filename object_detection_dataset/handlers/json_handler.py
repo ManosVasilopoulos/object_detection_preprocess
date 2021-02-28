@@ -7,6 +7,7 @@ from object_detection_dataset.outputs_handler2 import Outputs_Handler2
 
 class JSON_Handler(Outputs_Handler2):
     data: dict
+
     def get_data(self):
         if self.data:
             return self.data
@@ -42,8 +43,10 @@ class JSON_Handler(Outputs_Handler2):
 from object_detection_dataset.constants._path_creator import ConfigPaths
 
 if __name__ == '__main__':
-    dataset_dir = 'E:\\Data Sets\\Detection\\COCO'
+    paths = ConfigPaths("D:\Documents\Computer Vision\Object Detection\Datasets\COCO", False)
+    dataset_dir = 'D:\Documents\Computer Vision\Object Detection\Datasets\COCO'
     handler = JSON_Handler(dataset_dir)
 
-    data = handler.read_json("E:\\Data Sets\\Detection\\COCO\\outputs\\original_format\\instances_val2017.json")
+    json_path = os_path_join(dataset_dir, 'instances_val2017.json')
+    data = handler.read_json(json_path)
     handler.inspect_json(data)
