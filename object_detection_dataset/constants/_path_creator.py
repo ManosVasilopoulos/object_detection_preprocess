@@ -31,7 +31,7 @@ class ConfigPaths:
 
         # images
         self.images_dir = join(self.inputs_dir, 'images')
-
+        """
         self.complete_images_dir = join(self.images_dir, 'complete')
         self.complete_visible_images_dir = join(self.complete_images_dir, 'visible')
         self.complete_infrared_images_dir = join(self.complete_images_dir, 'infrared')
@@ -47,7 +47,7 @@ class ConfigPaths:
         self.unavailable_images_dir = join(self.videos_dir, 'unavailable')
         self.unavailable_visible_images_dir = join(self.unavailable_images_dir, 'visible')
         self.unavailable_infrared_images_dir = join(self.unavailable_images_dir, 'infrared')
-
+        """
         """ OTHER """
         self.other_files_dir = join(self.dataset_dir, 'other_files')
         self.dataset_annotations_path = join(self.dataset_dir, 'data_report\\unified_sheet.csv')
@@ -55,11 +55,12 @@ class ConfigPaths:
         """ Outputs """
         # Original Format
         self.original_format_dir = join(self.outputs_dir, 'original_format')
+        """
         self.complete_visible_txt_dir = join(self.original_format_dir, '\\complete\\visible')
         self.complete_infrared_txt_dir = join(self.original_format_dir, '\\complete\\infrared')
         self.incomplete_visible_txt_dir = join(self.original_format_dir, '\\incomplete\\visible')
         self.incomplete_infrared_txt_dir = join(self.original_format_dir, '\\incomplete\\infrared')
-
+        """
         # Outputs > Standard Format
         self.standard_format_dir = join(self.outputs_dir, 'standard_format')
         # TODO - Design a workflow that Creates folders for each step of the "standarization" process
@@ -89,5 +90,5 @@ class ConfigPaths:
         # Create Directory Tree
         if make_dirs:
             for var in vars(self):
-                print('Making Directory:', var)
-                makedirs(var, exist_ok=True)
+                print('Making Directory:', getattr(self, var))
+                makedirs(getattr(self, var), exist_ok=True)

@@ -1,7 +1,7 @@
-from detection_and_tracking.configuration.seagull import dataset_dir, standard_format_dir, yolo_v5_pytorch_labels_dir
+from object_detection_dataset.constants._path_creator import ConfigPaths
 import pandas as pd
 from os.path import join
-
+from argparse import ArgumentParser
 """
 YOLO has 3 types of file:
 1. image.jpg
@@ -10,7 +10,13 @@ YOLO has 3 types of file:
 """
 
 if __name__ == '__main__':
-    df = pd.read_csv(join(standard_format_dir, 'dataset.csv'))
+    parser = ArgumentParser()
+    parser.add_argument('--dataset_dir', help='Root folder of dataset.')
+
+    dataset_dir = ''
+    paths = ConfigPaths(dataset_dir)
+    df = pd.read_csv(join(paths.standard_format_dir, 'dataset.csv'), index_col=0)
+
     for index, row in df.iterrows():
         frame_name = row['frame_name']
         classes = eval(row['class'])
@@ -21,7 +27,7 @@ if __name__ == '__main__':
         width = row['width']
         height = row['height']
 
-        with open(join(yolo_v5_pytorch_labels_dir, frame_name.replace('.jpg', '.txt')), 'w+') as f:
+        with open(join(paths.yolo_v5_pytorch_labels_dir, frame_name.replace('.jpg', '.txt')), 'w+') as f:
             for i in range(len(xmins)):
                 xmin = xmins[0]
                 ymin = ymins[0]
